@@ -13,8 +13,6 @@
  */
 package io.trino.server.security.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SigningKeyResolver;
@@ -23,6 +21,9 @@ import io.trino.server.security.AuthenticationException;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.trino.server.security.UserMapping.createUserMapping;
 
@@ -49,9 +50,9 @@ public class JwtAuthenticator
     }
 
     @Override
-    protected Jws<Claims> parseClaimsJws(String jws)
+    protected Map<String, Object> convertTokenToClaims(String token)
     {
-        return jwtParser.parseClaimsJws(jws);
+        return jwtParser.parseClaimsJws(token).getBody();
     }
 
     @Override

@@ -13,8 +13,6 @@
  */
 package io.trino.server.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.trino.spi.security.BasicPrincipal;
 import io.trino.spi.security.Identity;
@@ -22,6 +20,7 @@ import io.trino.spi.security.Identity;
 import javax.ws.rs.container.ContainerRequestContext;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static java.lang.String.format;
@@ -50,11 +49,13 @@ public abstract class AbstractBearerAuthenticator
             throws AuthenticationException
     {
         try {
-            Jws<Claims> claimsJws = parseClaimsJws(token);
-            String principal = claimsJws.getBody().get(principalField, String.class);
-            if (principal == null) {
+            Map<String, Object> claims = convertTokenToClaims(token);
+            Object principalObj = claims.get(principalField);
+            if (principalObj == null) {
                 throw needAuthentication(request, "Invalid credentials");
             }
+
+            String principal = principalObj.toString();
             String authenticatedUser = userMapping.mapUser(principal);
             return Identity.forUser(authenticatedUser)
                     .withPrincipal(new BasicPrincipal(principal))
@@ -91,7 +92,7 @@ public abstract class AbstractBearerAuthenticator
         return token;
     }
 
-    protected abstract Jws<Claims> parseClaimsJws(String jws);
+    protected abstract Map<String, Object> convertTokenToClaims(String token);
 
     protected abstract AuthenticationException needAuthentication(ContainerRequestContext request, String message);
 }

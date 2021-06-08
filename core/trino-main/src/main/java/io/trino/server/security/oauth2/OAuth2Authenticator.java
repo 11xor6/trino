@@ -13,8 +13,6 @@
  */
 package io.trino.server.security.oauth2;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.trino.server.security.AbstractBearerAuthenticator;
 import io.trino.server.security.AuthenticationException;
 
@@ -22,6 +20,7 @@ import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.UUID;
 
 import static io.trino.server.security.UserMapping.createUserMapping;
@@ -43,9 +42,9 @@ public class OAuth2Authenticator
     }
 
     @Override
-    protected Jws<Claims> parseClaimsJws(String jws)
+    protected Map<String, Object> convertTokenToClaims(String token)
     {
-        return service.parseClaimsJws(jws);
+        return service.convertTokenToClaims(token);
     }
 
     @Override
